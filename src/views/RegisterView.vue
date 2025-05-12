@@ -13,7 +13,7 @@
 
       <!-- 注册按钮 -->
       <el-form-item>
-        <el-button type="primary" @click="hanldeRegister">登录</el-button>
+        <el-button type="primary" @click="hanldeRegister">注册</el-button>
       </el-form-item>
 
       <!-- 登录跳转 -->
