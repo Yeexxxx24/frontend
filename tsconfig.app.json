@@ -53,5 +53,5 @@
     /* 👇👇 添加的类型声明 👇👇 */
     "types": ["node"]
   },
-  "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.vue"]
+  "include": ["src/**/*.ts", "src/**/*.tsx", "src/**/*.vue", "src/router/upload.js"]
 }

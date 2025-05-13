@@ -22,7 +22,7 @@
          <el-main class="main">
             <router-view/>
             <!-- <h2>欢迎使用代码查重系统</h2> -->
-            <p>请选择左侧功能进行操作</p>
+            <!-- <p>请选择左侧功能进行操作</p> -->
          </el-main>
      </el-container>
   </el-container>
