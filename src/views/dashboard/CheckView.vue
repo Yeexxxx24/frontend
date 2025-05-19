@@ -24,16 +24,26 @@
         show-icon
         class="uploaded-file"
       />
+
+      <!-- 查重按钮 -->
+      <el-button
+        type="primary"
+        @click="checkFile"
+        :disabled="!uploadedFilename"
+        style="margin-top: 10px"
+      >
+        查重
+      </el-button>
     </div>
 
     <!-- 右侧：说明 + 查重结果 -->
     <div class="right-panel">
       <el-card class="description">
-        <p>📌 上传代码文件后系统将自动进行相似度检测。</p>
+        <p>📌 上传代码文件后点击“查重”按钮可检测相似度。</p>
         <p>支持格式：.txt、.js、.java、.cpp 等</p>
       </el-card>
 
-      <el-card class="result" v-if="result">
+      <el-card class="result" v-if="result.similarity !== null">
         <h3>查重结果：</h3>
         <p>相似度：{{ result.similarity }}%</p>
         <p>匹配文件：{{ result.matchedFile }}</p>
@@ -46,14 +56,27 @@
 import { ref } from 'vue'
 import { ElMessage } from 'element-plus'
 import request from '@/utils/request'
+import axios from 'axios'
+import { useUserStore } from '@/stores/user'
 
-const fileName = ref<string>('') // 显示上传的文件名
-const result = ref<null | { similarity: number; matchedFile: string }>(null)
+const store = useUserStore()
 
-// 模拟上传处理
+const fileName = ref<string>('') // 原始文件名（中文）
+const uploadedFilename = ref<string>('') // 后端返回的唯一文件名
+
+// 查重结果对象
+const result = ref<{
+  similarity: number | null
+  matchedFile: string
+}>({
+  similarity: null,
+  matchedFile: ''
+})
+
+// 上传处理函数
 const handleUpload = async (file: File) => {
   const formData = new FormData()
-  formData.append('file', file) // 👈 这里的 'file' 对应后端的字段名
+  formData.append('file', file)
 
   try {
     const res = await request.post('/upload', formData, {
@@ -62,27 +85,43 @@ const handleUpload = async (file: File) => {
       }
     })
 
-    // 成功后保存文件名并提示
-    fileName.value = file.name
-    ElMessage.success(`上传成功：${file.name}`)
+    // 成功后保存原始文件名和唯一文件名
+    fileName.value = res.data.originalName || file.name
+    uploadedFilename.value = res.data.filename
 
-    // 可选：模拟结果（后续会替换成后端返回结果）
-    result.value = {
-      similarity: 78.5,
-      // matchedFile: res.data.filename || 'unknown'
-      matchedFile:res.data.originalName
-      
-    }
-    console.log('✅ 上传成功，原名为：', res.data.originalName)
-
+    ElMessage.success(`上传成功：${fileName.value}`)
+    console.log('✅ 上传成功，原名为：', fileName.value)
   } catch (err) {
     console.error('上传失败', err)
     ElMessage.error('上传失败，请重试')
   }
 
-   return false // 仍然阻止默认上传行为
-  } 
+  return false // 阻止默认上传行为
+}
 
+// 查重函数
+const checkFile = async () => {
+  if (!uploadedFilename.value) return
+
+  try {
+    const res = await axios.post('/api/check', {
+      filename: uploadedFilename.value,
+      userId: store.id
+    })
+
+    if (res.data.code === 200) {
+      result.value = {
+        similarity: res.data.similarity,
+        matchedFile: res.data.matchedFile || '未知'
+      }
+    } else {
+      ElMessage.warning('查重失败，请稍后再试')
+    }
+  } catch (err) {
+    console.error('查重接口调用失败', err)
+    ElMessage.error('查重请求失败')
+  }
+}
 </script>
 
 <style scoped>
