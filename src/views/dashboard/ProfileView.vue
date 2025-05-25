@@ -26,6 +26,7 @@
 
     <!-- 查重记录表格 -->
     <el-table
+     v-if="store.role === 'student'"
       :data="historyList || []"
       stripe
       border
@@ -42,6 +43,7 @@
     </el-table>
 
     <el-pagination
+     v-if="store.role === 'student'"
       background
       layout="prev, pager, next"
       :total="total"

@@ -5,8 +5,12 @@ import Dashboard from '@/views/Dashboard.vue'
 import CheckView from '@/views/dashboard/CheckView.vue'
 import ProfileView from '@/views/dashboard/ProfileView.vue'
 import TeacherCheckView from '@/views/dashboard/TeacherCheckView.vue'
-import AllHistoryView from '@/views/dashboard/AllHistoryView.vue'
+import AllHistoryView from '@/views/dashboard/TeacherAllHistoryView.vue'
 import TeacherWelcome from '@/views/dashboard/TeacherWelcome.vue'
+import AssignHomeworkView from '@/views/dashboard/TeacherAssignHomeworkView.vue'
+import TeacherAssignments from '@/views/dashboard/TeacherAssignments.vue'
+import AssignListView from '@/views/dashboard/TeacherAssignListView.vue'
+import StudentHomeworkList from '@/views/dashboard/StudentHomeworkList.vue'
 
 const routes: RouteRecordRaw[] = [
   // 重定向 用户访问时直接跳转到登录页面
@@ -22,6 +26,10 @@ const routes: RouteRecordRaw[] = [
     path: '/register', 
     component: RegisterView 
   },
+  // {
+  //   path:'/dashboard/assign',
+  //   component:AssignHomeworkView
+  // },
   { 
     path: '/dashboard', 
     component: Dashboard,
@@ -46,6 +54,22 @@ const routes: RouteRecordRaw[] = [
         path: 'all-history', 
         component: AllHistoryView 
       },
+      {
+        path:'assign',
+        component:AssignHomeworkView
+      },
+      {
+        path:'teacher-assignments',
+        component:TeacherAssignments
+      },
+      {
+        path:'assignment-list',
+        component:AssignListView
+      },
+      {
+        path:'student-homework',
+        component:StudentHomeworkList
+      }
     ]
   },
   {

@@ -13,13 +13,6 @@
       <!-- 左侧菜单栏 -->
       <el-aside width="200px" class="aside">
         <el-menu default-active="1">
-         <!--  <el-menu-item index="1" @click="router.push('/dashboard/check')"
-            >查重模块</el-menu-item
-          >
-          <el-menu-item index="2" @click="router.push('/dashboard/profile')"
-            >个人信息</el-menu-item
-          > -->
-
           <el-menu-item
             v-if="store.role === 'student'"
             index="1"
@@ -27,23 +20,52 @@
             >查重模块</el-menu-item
           >
           <el-menu-item
+            v-if="store.role === 'student'"
+            index="4"
+            @click="router.push('/dashboard/student-homework')"
+          >
+            提交作业
+          </el-menu-item>
+          <el-menu-item
             v-if="store.role === 'teacher'"
             index="1"
             @click="router.push('/dashboard/all-history')"
             >所有学生记录</el-menu-item
           >
+          <!-- 教师：发布作业 -->
+          <el-menu-item
+            v-if="store.role === 'teacher'"
+            index="3"
+            @click="router.push('/dashboard/assign')"
+          >
+            发布作业
+          </el-menu-item>
 
           <el-menu-item index="2" @click="router.push('/dashboard/profile')"
             >个人信息</el-menu-item
           >
+
+          <el-menu-item
+            v-if="store.role === 'teacher'"
+            index="2"
+            @click="router.push('/dashboard/teacher-assignments')"
+          >
+            我发布的作业
+          </el-menu-item>
+
+          <el-menu-item
+            v-if="store.role === 'teacher'"
+            index="3"
+            @click="router.push('/dashboard/assignment-list')"
+          >
+            作业管理
+          </el-menu-item>
         </el-menu>
       </el-aside>
 
       <!-- 主内容区域 -->
       <el-main class="main">
         <router-view />
-        <!-- <h2>欢迎使用代码查重系统</h2> -->
-        <!-- <p>请选择左侧功能进行操作</p> -->
       </el-main>
     </el-container>
   </el-container>
