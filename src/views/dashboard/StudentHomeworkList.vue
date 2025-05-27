@@ -9,7 +9,7 @@
       </el-select>
     </div>
 
-    <el-table :data="filteredAssignments" style="width: 100%">
+    <el-table :data="filterList" style="width: 100%" @row-click="goToSubmitPage">
       <el-table-column prop="title" label="标题" />
       <el-table-column prop="description" label="描述" />
       <el-table-column label="截止时间">
@@ -95,6 +95,13 @@ const filterList = () => {
 // 点击“提交作业”按钮跳转
 const goSubmit = (assignmentId: number) => {
   router.push(`/dashboard/submit/${assignmentId}`)
+}
+
+const goToSubmitPage = (row:any) => {
+  router.push({
+    path:'/dashboard/submit-homework',
+    query:{id:row.id}
+  })
 }
 
 // 页面挂载时获取数据

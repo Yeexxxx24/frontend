@@ -11,6 +11,7 @@ import AssignHomeworkView from '@/views/dashboard/TeacherAssignHomeworkView.vue'
 import TeacherAssignments from '@/views/dashboard/TeacherAssignments.vue'
 import AssignListView from '@/views/dashboard/TeacherAssignListView.vue'
 import StudentHomeworkList from '@/views/dashboard/StudentHomeworkList.vue'
+import SubmitHomeworkView from '@/views/dashboard/SubmitHomeworkView.vue'
 
 const routes: RouteRecordRaw[] = [
   // 重定向 用户访问时直接跳转到登录页面
@@ -69,6 +70,9 @@ const routes: RouteRecordRaw[] = [
       {
         path:'student-homework',
         component:StudentHomeworkList
+      },{
+        path:'submit-homework',
+        component:SubmitHomeworkView
       }
     ]
   },
