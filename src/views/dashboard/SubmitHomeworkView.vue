@@ -1,98 +1,125 @@
 <template>
-  <div class="student-homework-list">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-      <h3>作业列表</h3>
-      <el-select v-model="filterStatus" placeholder="筛选提交状态" style="width: 180px">
-        <el-option label="全部" value="all" />
-        <el-option label="已提交" value="submitted" />
-        <el-option label="未提交" value="unsubmitted" />
-      </el-select>
-    </div>
+  <div class="submit-homework">
+    <el-card class="box-card">
+      <div class="assignment-info">
+        <h2>{{ assignment?.title }}</h2>
+        <p>{{ assignment?.description }}</p>
+        <p style="margin-top: 10px;">截止时间：<strong>{{ formatTime(assignment?.deadline) }}</strong></p>
+      </div>
 
-    <el-table
-      :data="filteredAssignments.value"
-      style="width: 100%;"
-      highlight-current-row
-      @row-click="goToSubmitPage"
-    >
-      <el-table-column prop="title" label="标题" />
-      <el-table-column prop="description" label="说明" />
-      <el-table-column label="截止时间">
-        <template #default="{ row }">
-          {{ formatTime(row.deadline) }}
-        </template>
-      </el-table-column>
-      <el-table-column label="提交状态" width="120">
-        <template #default="{ row }">
-          <el-tag type="success" v-if="row.submitted">已提交</el-tag>
-          <el-tag type="info" v-else>未提交</el-tag>
-        </template>
-      </el-table-column>
-    </el-table>
+      <el-divider />
+
+      <el-upload
+        class="upload-area"
+        :show-file-list="true"
+        :http-request="customRequest"
+        :auto-upload="false"
+        :on-change="handleFileChange"
+        :file-list="fileList"
+      >
+        <el-button type="primary">选择文件</el-button>
+      </el-upload>
+
+      <el-button
+        type="success"
+        style="margin-top: 20px;"
+        :disabled="!file"
+        @click="submitHomework"
+      >
+        提交作业
+      </el-button>
+    </el-card>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed} from 'vue'
-import type{ Ref } from 'vue'
+import { ref, onMounted } from 'vue'
+import { useRoute } from 'vue-router'
 import request from '@/utils/request'
+import { useUserStore } from '@/stores/user'
 import { ElMessage } from 'element-plus'
 import dayjs from 'dayjs'
-import { useUserStore } from '@/stores/user'
-import { useRouter } from 'vue-router'
 
-const router = useRouter()
+const route = useRoute()
 const store = useUserStore()
 
-const allAssignments = ref<any[]>([])
-const filterStatus = ref('all')
+const assignment = ref<any>({})
+const file = ref<File | null>(null)
+const fileList = ref<any[]>([])
 
+// 格式化时间
 const formatTime = (time: string) => {
   return dayjs(time).format('YYYY-MM-DD HH:mm:ss')
 }
 
-const fetchAssignments = async () => {
+// 获取作业详情
+const fetchAssignment = async () => {
+  const assignmentId = route.query.id
+  if (!assignmentId) return
+
   try {
-    const res = await request.get('/assignment/all')
+    const res = await request.get('/assignment/detail', {
+      params: { id: assignmentId }
+    })
     if (res.data.code === 200) {
-      const assignments = res.data.data
-
-      for (const item of assignments) {
-        const subRes = await request.get('/submission/status', {
-          params: {
-            assignmentId: item.id,
-            studentId: store.id
-          }
-        })
-        item.submitted = subRes.data.data?.submitted || false
-      }
-
-      allAssignments.value = assignments
+      assignment.value = res.data.data
     } else {
-      ElMessage.error(res.data.message || '获取作业失败')
+      ElMessage.error(res.data.message || '获取作业信息失败')
     }
   } catch (error) {
-    console.error('获取作业失败:', error)
+    console.error(error)
     ElMessage.error('网络错误')
   }
 }
 
-const filteredAssignments:Ref<any[]> = computed<any[]>(() => {
-  if (filterStatus.value === 'all') {
-    return allAssignments.value
-  } else if (filterStatus.value === 'submitted') {
-    return allAssignments.value.filter(a => a.submitted)
-  } else {
-    return allAssignments.value.filter(a => !a.submitted)
-  }
-})
+// 提交作业
+const submitHomework = async () => {
+  if (!file.value || !assignment.value?.id) return
 
-const goToSubmitPage = (row: any) => {
-  router.push({
-    path: '/dashboard/submit',
-    query: { id: row.id }
-  })
+  const formData = new FormData()
+  formData.append('studentId', String(store.id))
+  formData.append('assignmentId', String(assignment.value.id))
+  formData.append('file', file.value)
+
+  try {
+    const res = await request.post('/submission', formData)
+    if (res.data.code === 200) {
+      ElMessage.success('提交成功')
+    } else {
+      ElMessage.error(res.data.message || '提交失败')
+    }
+  } catch (err) {
+    console.error(err)
+    ElMessage.error('提交异常')
+  }
 }
 
-onMounted(fetchAssignments)
+// 自定义上传拦截，阻止自动上传行为
+const customRequest = () => {
+  // 不需要实际上传，submitHomework 会处理
+}
+
+// 处理文件变化
+const handleFileChange = (uploadFile: any) => {
+  file.value = uploadFile.raw
+}
+
+onMounted(fetchAssignment)
 </script>
+
+<style scoped>
+.submit-homework {
+  max-width: 700px;
+  margin: 40px auto;
+}
+.assignment-info h2 {
+  margin-bottom: 10px;
+}
+.assignment-info p {
+  font-size: 15px;
+  color: #444;
+}
+.upload-area {
+  margin-top: 20px;
+}
+</style>

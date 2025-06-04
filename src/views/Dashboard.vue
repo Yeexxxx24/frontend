@@ -2,7 +2,7 @@
   <el-container style="height: 100vh">
     <!-- 顶部导航栏 -->
     <el-header class="header">
-      <div class="logo">代码查重系统</div>
+      <div class="logo">{{ systemTitle }}</div>
       <div class="user-info">
         <span>欢迎，{{ store.username }} ({{ roleLabel[store.role] }})</span>
         <el-button type="danger" @click="handleLogout">退出</el-button>
@@ -12,54 +12,26 @@
     <el-container>
       <!-- 左侧菜单栏 -->
       <el-aside width="200px" class="aside">
-        <el-menu default-active="1">
-          <el-menu-item
-            v-if="store.role === 'student'"
-            index="1"
-            @click="router.push('/dashboard/check')"
-            >查重模块</el-menu-item
-          >
-          <el-menu-item
-            v-if="store.role === 'student'"
-            index="4"
-            @click="router.push('/dashboard/student-homework')"
-          >
-            提交作业
-          </el-menu-item>
-          <el-menu-item
-            v-if="store.role === 'teacher'"
-            index="1"
-            @click="router.push('/dashboard/all-history')"
-            >所有学生记录</el-menu-item
-          >
-          <!-- 教师：发布作业 -->
-          <el-menu-item
-            v-if="store.role === 'teacher'"
-            index="3"
-            @click="router.push('/dashboard/assign')"
-          >
-            发布作业
-          </el-menu-item>
+        <el-menu
+          router
+          :default-active="$route.path"
+          class="el-menu-vertical-demo"
+        >
+          <!-- 学生菜单 -->
+          <template v-if="store.role === 'student'">
+            <el-menu-item index="/dashboard/check">查重模块</el-menu-item>
+            <el-menu-item index="/dashboard/student-homework">提交作业</el-menu-item>
+            <el-menu-item index="/dashboard/profile">个人信息</el-menu-item>
+          </template>
 
-          <el-menu-item index="2" @click="router.push('/dashboard/profile')"
-            >个人信息</el-menu-item
-          >
-
-          <el-menu-item
-            v-if="store.role === 'teacher'"
-            index="2"
-            @click="router.push('/dashboard/teacher-assignments')"
-          >
-            我发布的作业
-          </el-menu-item>
-
-          <el-menu-item
-            v-if="store.role === 'teacher'"
-            index="3"
-            @click="router.push('/dashboard/assignment-list')"
-          >
-            作业管理
-          </el-menu-item>
+          <!-- 教师菜单 -->
+          <template v-if="store.role === 'teacher'">
+            <el-menu-item index="/dashboard/all-history">所有学生记录</el-menu-item>
+            <el-menu-item index="/dashboard/assign">发布作业</el-menu-item>
+            <el-menu-item index="/dashboard/teacher-assignments">我发布的作业</el-menu-item>
+            <el-menu-item index="/dashboard/assignment-list">作业管理</el-menu-item>
+            <el-menu-item index="/dashboard/profile">个人信息</el-menu-item>
+          </template>
         </el-menu>
       </el-aside>
 
@@ -72,25 +44,29 @@
 </template>
 
 <script setup lang="ts">
-import { useUserStore } from "@/stores/user"; //用户状态store
-import { useRouter } from "vue-router"; //用于跳转页面
-import { ElMessage } from "element-plus"; //弹出提示
+import { useUserStore } from "@/stores/user";
+import { useRouter } from "vue-router";
+import { ElMessage } from "element-plus";
+import { computed } from "vue";
 
 const store = useUserStore();
 const router = useRouter();
+// const route = useRoute();
 
-// 中文角色标签映射
 const roleLabel: Record<string, string> = {
   student: "学生",
   teacher: "教师",
   "": "未定义",
 };
 
-// 退出登录逻辑
+const systemTitle = computed(() => {
+  return store.role === "teacher" ? "代码查重系统" : "作业提交平台";
+});
+
 const handleLogout = () => {
-  store.clearUser(); //清空token和用户信息
+  store.clearUser();
   ElMessage.success("已退出登录");
-  router.push("/login"); //跳回登录页
+  router.push("/login");
 };
 </script>
 

@@ -1,30 +1,32 @@
 <template>
-  <div class="homework-wrapper">
-    <div class="header">
+  <div class="student-homework-list">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
       <h3>作业列表</h3>
-      <el-select v-model="filter" placeholder="筛选" @change="filterList">
+      <el-select v-model="filterStatus" placeholder="筛选提交状态" style="width: 180px">
         <el-option label="全部" value="all" />
         <el-option label="已提交" value="submitted" />
         <el-option label="未提交" value="unsubmitted" />
       </el-select>
     </div>
 
-    <el-table :data="filterList" style="width: 100%" @row-click="goToSubmitPage">
+    <!-- ✅ 关键点：:data 必须是 Array 类型 -->
+    <el-table
+      :data="filteredAssignments"
+      style="width: 100%;"
+      highlight-current-row
+      @row-click="goToSubmitPage"
+    >
       <el-table-column prop="title" label="标题" />
-      <el-table-column prop="description" label="描述" />
+      <el-table-column prop="description" label="说明" />
       <el-table-column label="截止时间">
-        <template #default="{ row }">{{ formatTime(row.deadline) }}</template>
-      </el-table-column>
-      <el-table-column label="提交状态">
         <template #default="{ row }">
-          <el-tag :type="row.submitted ? 'success' : 'danger'">
-            {{ row.submitted ? '已提交' : '未提交' }}
-          </el-tag>
+          {{ formatTime(row.deadline) }}
         </template>
       </el-table-column>
-      <el-table-column label="操作">
+      <el-table-column label="提交状态" width="120">
         <template #default="{ row }">
-          <el-button type="primary" size="small" @click="goSubmit(row.id)">提交作业</el-button>
+          <el-tag type="success" v-if="row.submitted">已提交</el-tag>
+          <el-tag type="info" v-else>未提交</el-tag>
         </template>
       </el-table-column>
     </el-table>
@@ -32,34 +34,33 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import request from '@/utils/request'
 import { ElMessage } from 'element-plus'
+import dayjs from 'dayjs'
 import { useUserStore } from '@/stores/user'
 import { useRouter } from 'vue-router'
-import dayjs from 'dayjs'
 
-const store = useUserStore()
 const router = useRouter()
+const store = useUserStore()
 
-const allAssignments = ref<any[]>([])         // 后端返回的完整作业数据
-const filteredAssignments = ref<any[]>([])    // 页面上实际展示的
-const filter = ref('all')                     // 当前筛选条件：all / submitted / unsubmitted
+// ✅ 明确声明 ref 类型为数组
+const allAssignments = ref<any[]>([])
+const filterStatus = ref('all')
 
-// 格式化时间
+// 时间格式化函数
 const formatTime = (time: string) => {
   return dayjs(time).format('YYYY-MM-DD HH:mm:ss')
 }
 
-// 查询所有作业，并判断每条作业是否已提交
+// 获取作业数据
 const fetchAssignments = async () => {
   try {
-    //向后端接口 GET /assignment/all 发送请求 获取所有作业
-    const res = await request.get('/assignment/all') 
+    const res = await request.get('/assignment/all')
     if (res.data.code === 200) {
       const assignments = res.data.data
 
-      // 对每个作业查询提交状态
+      // 为每个作业请求学生提交状态
       for (const item of assignments) {
         const subRes = await request.get('/submission/status', {
           params: {
@@ -71,52 +72,33 @@ const fetchAssignments = async () => {
       }
 
       allAssignments.value = assignments
-      filterList() // 初始渲染筛选
     } else {
       ElMessage.error(res.data.message || '获取作业失败')
     }
-  } catch (err) {
-    console.error('获取作业失败', err)
-    ElMessage.error('请求错误')
+  } catch (error) {
+    console.error('获取作业失败:', error)
+    ElMessage.error('网络错误')
   }
 }
 
-// 筛选函数
-const filterList = () => {
-  if (filter.value === 'all') {
-    filteredAssignments.value = allAssignments.value
+// 根据筛选状态生成过滤列表（返回数组类型）
+const filteredAssignments = computed(() => {
+  if (filterStatus.value === 'all') {
+    return allAssignments.value
+  } else if (filterStatus.value === 'submitted') {
+    return allAssignments.value.filter(a => a.submitted)
   } else {
-    filteredAssignments.value = allAssignments.value.filter(item =>
-      filter.value === 'submitted' ? item.submitted : !item.submitted
-    )
+    return allAssignments.value.filter(a => !a.submitted)
   }
-}
+})
 
-// 点击“提交作业”按钮跳转
-const goSubmit = (assignmentId: number) => {
-  router.push(`/dashboard/submit/${assignmentId}`)
-}
-
-const goToSubmitPage = (row:any) => {
+// 点击跳转到提交详情页
+const goToSubmitPage = (row: any) => {
   router.push({
-    path:'/dashboard/submit-homework',
-    query:{id:row.id}
+    path: '/dashboard/submit',
+    query: { id: row.id }
   })
 }
 
-// 页面挂载时获取数据
-onMounted(() => {
-  fetchAssignments()
-})
+onMounted(fetchAssignments)
 </script>
-
-<style scoped>
-.homework-wrapper {
-  padding: 30px;
-}
-.header {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 20px;
-}
-</style>
