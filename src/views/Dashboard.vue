@@ -28,8 +28,8 @@
           <template v-if="store.role === 'teacher'">
             <el-menu-item index="/dashboard/all-history">所有学生记录</el-menu-item>
             <el-menu-item index="/dashboard/assign">发布作业</el-menu-item>
-            <el-menu-item index="/dashboard/teacher-assignments">我发布的作业</el-menu-item>
-            <el-menu-item index="/dashboard/assignment-list">作业管理</el-menu-item>
+            <el-menu-item index="/dashboard/teacher-assignments">作业管理</el-menu-item>
+            <!-- <el-menu-item index="/dashboard/assignment-list">作业管理</el-menu-item> -->
             <el-menu-item index="/dashboard/profile">个人信息</el-menu-item>
           </template>
         </el-menu>

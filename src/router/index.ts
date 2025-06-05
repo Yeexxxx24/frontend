@@ -8,13 +8,10 @@ import TeacherCheckView from '@/views/dashboard/TeacherCheckView.vue'
 import AllHistoryView from '@/views/dashboard/TeacherAllHistoryView.vue'
 import TeacherWelcome from '@/views/dashboard/TeacherWelcome.vue'
 import AssignHomeworkView from '@/views/dashboard/TeacherAssignHomeworkView.vue'
-import TeacherAssignments from '@/views/dashboard/TeacherAssignments.vue'
-import AssignListView from '@/views/dashboard/TeacherAssignListView.vue'
 import StudentHomeworkList from '@/views/dashboard/StudentHomeworkList.vue'
 import SubmitHomeworkView from '@/views/dashboard/SubmitHomeworkView.vue'
-// import TeacherAssignments from '@/views/dashboard/TeacherAssignments.vue'
 import TeacherSubmissionsView from '@/views/dashboard/TeacherSubmissionsView.vue'
-
+import TeacherAssignListView from '@/views/dashboard/TeacherAssignListView.vue'
 const routes: RouteRecordRaw[] = [
   // 重定向 用户访问时直接跳转到登录页面
   {
@@ -39,33 +36,36 @@ const routes: RouteRecordRaw[] = [
         redirect:'check'
       },
       {
+        // 教师欢迎页
         path:'welcome',
         component:TeacherWelcome
       },
       {
+        // 学生查重模块
         path:'check',
         component:CheckView
       },
       {
+        // 用户个人信息页面
         path:'profile',
         component:ProfileView
       },
        { 
+        // 教师查看所有学生查重记录
         path: 'all-history', 
         component: AllHistoryView 
       },
       {
+        // 教师发布新作业
         path:'assign',
         component:AssignHomeworkView
       },
       {
+        // 教师-我的作业
         path:'teacher-assignments',
-        component:TeacherAssignments
+        component:TeacherAssignListView
       },
-      {
-        path:'assignment-list',
-        component:AssignListView
-      },
+    //  学生提交作业详情页
       {
         path:'student-homework',
         component:StudentHomeworkList
@@ -74,6 +74,12 @@ const routes: RouteRecordRaw[] = [
         component:SubmitHomeworkView
       },
       {
+        path: 'submissions',
+        component: TeacherSubmissionsView
+      },
+
+      {
+        // 教师查看某一作业的提交记录列表
         path:'teacher-submissions',
         component:TeacherSubmissionsView
       }
