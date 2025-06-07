@@ -11,7 +11,7 @@ import AssignHomeworkView from '@/views/dashboard/TeacherAssignHomeworkView.vue'
 import StudentHomeworkList from '@/views/dashboard/StudentHomeworkList.vue'
 import SubmitHomeworkView from '@/views/dashboard/SubmitHomeworkView.vue'
 import TeacherSubmissionsView from '@/views/dashboard/TeacherSubmissionsView.vue'
-import TeacherAssignListView from '@/views/dashboard/TeacherAssignListView.vue'
+import TeacherAssignmentsView from '@/views/dashboard/TeacherAssignmentsView.vue'
 const routes: RouteRecordRaw[] = [
   // 重定向 用户访问时直接跳转到登录页面
   {
@@ -63,7 +63,7 @@ const routes: RouteRecordRaw[] = [
       {
         // 教师-我的作业
         path:'teacher-assignments',
-        component:TeacherAssignListView
+        component:TeacherAssignmentsView
       },
     //  学生提交作业详情页
       {
@@ -74,15 +74,11 @@ const routes: RouteRecordRaw[] = [
         component:SubmitHomeworkView
       },
       {
-        path: 'submissions',
+        path: 'teacher-submissions',
         component: TeacherSubmissionsView
       },
 
-      {
-        // 教师查看某一作业的提交记录列表
-        path:'teacher-submissions',
-        component:TeacherSubmissionsView
-      }
+    
     ]
   },
   {
